@@ -2,23 +2,24 @@
 const https = require('https');
 const { writeFile } = require('fs').promises
 
-const freeFontUrl = 'https://wordshub.github.io/free-font/js/data.js'
+const freeFontUrl = 'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyCak84RmCcPnHkSJBjK96QFIK8H7_fLVoE'
 https.get(freeFontUrl, (response) => {
   let str = '';
   response.on('data', (chunk) => {
     str += chunk;
   });
   response.on('end', () => {
-
-    const data = strToData(str)
+    // console.log(str)
+    const data = JSON.parse(str)
     // 筛选可直接使用的字体
-    const list = Object.keys(data).filter(key => {
-        return data[key].download.includes('.ttf')
-    })
+    // const list = Object.keys(data).filter(key => {
+    //     return data[key].download.includes('.ttf')
+    // })
+    const list = data["items"]
     // 生成字体和json文件
     generateCSS(list, data)
-    generateLocalCSS(list, data)
-    generateJSON(list, data)
+    // generateLocalCSS(list, data)
+    // generateJSON(list, data)
   });
 
 }).on("error", (error) => {
@@ -34,10 +35,10 @@ function strToData(str){
 // 生成css文件
 function generateCSS(list,data){
     let freeFont = ''
-    list.forEach(key => {
-      const newDownload = data[key].download.replace('https://github.com/wordshub/free-font/raw/master/', 'https://wordshub.github.io/free-font/')
+    list.forEach(obj => {
+      const newDownload = obj['files']['regular']
         freeFont += `@font-face {
-            font-family: '${data[key].name}';
+            font-family: '${obj['family']}';
             src: url('${newDownload}');
           }
           `
